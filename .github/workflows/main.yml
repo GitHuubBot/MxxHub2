@@ -11,7 +11,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
+
+      - name: Show Xcode version
+        run: xcodebuild -version
 
       - name: Install XcodeGen
         run: brew install xcodegen
@@ -21,6 +24,7 @@ jobs:
 
       - name: Build unsigned device app
         run: |
+          set -o pipefail
           xcodebuild \
             -project MexxBox.xcodeproj \
             -scheme MexxBox \
@@ -29,11 +33,22 @@ jobs:
             -destination 'generic/platform=iOS' \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
+            SWIFT_VERSION=5.9 \
+            SWIFT_STRICT_CONCURRENCY=minimal \
             CONFIGURATION_BUILD_DIR="$PWD/build" \
-            build
+            build | tee xcodebuild.log
+
+      - name: Upload build log if build fails
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: MexxBox-build-log
+          path: xcodebuild.log
+          if-no-files-found: ignore
 
       - name: Package IPA
         run: |
+          rm -rf Payload
           mkdir Payload
           cp -R build/MexxBox.app Payload/
           zip -qry MexxBox-unsigned.ipa Payload
