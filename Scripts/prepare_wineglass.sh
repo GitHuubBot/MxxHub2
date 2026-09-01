@@ -22,7 +22,9 @@ git clone --depth 1 https://github.com/jart/blink.git "$BLINK"
 # deliberately the conservative bring-up path for sideloaded iOS builds.
 cd "$BLINK"
 # WineGlass documents this iOS baseline config before running configure.
-cp config.h.ios config.h
+if [ -f config.h.ios ]; then
+  cp config.h.ios config.h
+fi
 ./configure \
   CC="$CC" \
   AR="$AR" \

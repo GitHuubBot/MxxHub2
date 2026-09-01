@@ -53,22 +53,23 @@ targets:
         OTHER_LDFLAGS:
           - -lbz2
           - -lz
+          - -lm
           - $(SRCROOT)/External/WineGlass/Vendor/blink/lib/wg_blink_impl.o
           - $(SRCROOT)/External/WineGlass/Vendor/blink/lib/blink.a
           - -Xlinker
           - -undefined
           - -Xlinker
           - dynamic_lookup
-    frameworks:
-      - Metal.framework
-      - MetalKit.framework
-      - QuartzCore.framework
-      - UIKit.framework
-      - GameController.framework
-      - CoreHaptics.framework
-      - Security.framework
-      - CoreGraphics.framework
-      - CoreText.framework
-      - UniformTypeIdentifiers.framework
+    dependencies:
+      - sdk: Metal.framework
+      - sdk: MetalKit.framework
+      - sdk: QuartzCore.framework
+      - sdk: UIKit.framework
+      - sdk: GameController.framework
+      - sdk: CoreHaptics.framework
+      - sdk: Security.framework
+      - sdk: CoreGraphics.framework
+      - sdk: CoreText.framework
+      - sdk: UniformTypeIdentifiers.framework
     scheme:
       gatherCoverageData: false
