@@ -21,6 +21,18 @@ git clone --depth 1 https://github.com/jart/blink.git "$BLINK"
 # The WineGlass integration currently uses blink in interpreter mode. This is
 # deliberately the conservative bring-up path for sideloaded iOS builds.
 cd "$BLINK"
+
+# IMPORTANT: blink's configure script uses a host flock utility while it edits
+# config.h. When cross-compiling with the iPhoneOS clang, allowing configure to
+# build its own flock would create an iOS binary that cannot run on the macOS
+# GitHub Actions host. The workflow therefore installs Homebrew flock first.
+if ! command -v flock >/dev/null 2>&1; then
+  echo "ERROR: native flock is required on the macOS build host." >&2
+  echo "Install it with: brew install flock" >&2
+  exit 1
+fi
+echo "==> Using native host flock: $(command -v flock)"
+
 # WineGlass documents this iOS baseline config before running configure.
 if [ -f config.h.ios ]; then
   cp config.h.ios config.h
