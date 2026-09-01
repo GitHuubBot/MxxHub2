@@ -1,26 +1,30 @@
-# Runtime roadmap
+# MxxHub runtime plan
 
-## v0.2 — achieved in this source package
+## v0.3 — current
 
-Windows PE32 parser → entry-point mapping → tiny x86 interpreter → on-device correctness test.
+Library -> PE32/PE32+ -> WineGlass engine -> blink x86/x86-64 -> Win32 thunks -> Metal Win32 compositor.
 
-## v0.3
-
-Integrate an existing mature x86 execution core rather than expanding the tiny interpreter. Current candidates:
-
-- WineGlass: Windows PE + Win32 API translation + Metal compositor.
-- Box64 iOS: embedded x86_64 translation foundation; pair with Wine/WoW64 later.
-
-Target: run a simple real Windows GUI program that calls Win32 APIs.
+Goal: execute real 32-bit/64-bit Windows programs directly from a saved MxxHub library entry and render basic Win32 UI.
 
 ## v0.4
 
-Wine/WoW64 + graphics bridge, file mappings, audio and controller input.
+- improve runtime logging inside MxxHub
+- mouse/keyboard/game-controller forwarding
+- working directory and game-folder filesystem compatibility
+- audio bridge
+- more Win32 APIs
 
-## Source Engine milestone
+## v0.5 graphics milestone
 
-1. Half-Life 2 / Source DX9 launcher starts.
-2. Portal reaches menu.
-3. Portal enters a map.
-4. Controller + touch mapping.
-5. Portal 2 after the Portal path is stable.
+- Direct3D translation/bridge
+- fullscreen framebuffer path
+- first Source-engine 3D test
+- Portal / Half-Life 2 compatibility work
+
+## Later
+
+- Hollow Knight / Unity-specific work
+- Steam client experiments
+- per-game compatibility presets
+- cover art / metadata
+- touch-control editor

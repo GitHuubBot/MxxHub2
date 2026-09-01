@@ -1,21 +1,25 @@
-# MexxBox v0.2 test
+# MxxHub v0.3 testing
 
-1. Build the unsigned IPA in GitHub Actions and sideload it as before.
-2. Put `MexxRuntimeTestFolder.zip` in Files on the iPhone and extract it.
-3. In MexxBox tap **+** and select the extracted `MexxRuntimeTestFolder`.
-4. The app should identify `MexxRuntimeTest.exe` as `x86 (32-bit) • Windows Console`.
-5. Add it to the library.
-6. Open it and press **Play / Runtime Test**.
-7. Success is:
+## Test 1 — library still works
 
-   `x86 executable ran`
+Add a normal game folder and verify MxxHub detects the `.exe`, remembers the game, and shows its PE architecture/subsystem.
 
-   and a message showing:
+## Test 2 — x86-64 runtime bring-up
 
-   `EAX returned 42`
+1. Copy `MxxHubRuntimeTestFolder.zip` to the iPhone Files app.
+2. Unzip it.
+3. Add the `MxxHubRuntimeTest` folder to MxxHub.
+4. Select `MxxRuntime64Test.exe`.
+5. Tap **Play**.
 
-That proves a real Windows PE file was parsed and its x86 entry-point instructions executed by MexxBox on iOS.
+Expected v0.3 behavior: the full-screen **MxxHub Windows Runtime** opens and the WineGlass/blink engine attempts to load and execute the PE32+ x86-64 program. The tiny test has an entry point that simply returns 42; it is used to validate x64 engine bring-up before testing a game.
 
-## Trying a real game EXE
+## Test 3 — Hollow Knight
 
-You can add Portal/HL2 folders now. MexxBox should identify the executable architecture. Pressing Play will probably stop at the first x86 instruction not supported by the tiny bring-up interpreter. That is expected. Do not treat that as a Portal compatibility failure; the next step is replacing the tiny interpreter with the WineGlass/Box64 backend and Win32/graphics support.
+Keep the Hollow Knight library entry you already created and press **Play**. The important difference from v0.2 is that MxxHub no longer rejects it merely because it is x86-64. It will hand `hollow_knight.exe` to the real experimental x64 backend.
+
+Do not expect gameplay yet. Hollow Knight uses Unity/Direct3D and depends on Windows APIs and graphics support beyond the current WineGlass milestone. A dark runtime screen, early stop or missing-API failure is useful diagnostic information for the next version.
+
+## If GitHub build fails
+
+Open the failed Actions run. If the failure is in **Prepare WineGlass + Blink runtime**, copy the last 30–50 lines of that step. If it is in **Build unsigned device app**, download the `MxxHub-v0.3-build-log` artifact and send it back.

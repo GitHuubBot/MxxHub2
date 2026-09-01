@@ -1,17 +1,14 @@
-#!/usr/bin/env bash
+#!/bin/bash
 set -euo pipefail
+cd "$(dirname "$0")/.."
 
-if ! command -v xcodegen >/dev/null 2>&1; then
-  echo "xcodegen is required. Install it with: brew install xcodegen"
-  exit 1
-fi
-
+brew list xcodegen >/dev/null 2>&1 || brew install xcodegen
+brew list make >/dev/null 2>&1 || brew install make
+bash Scripts/prepare_wineglass.sh
 xcodegen generate
-rm -rf build Payload MexxBox-unsigned.ipa
-
 xcodebuild \
-  -project MexxBox.xcodeproj \
-  -scheme MexxBox \
+  -project MxxHub.xcodeproj \
+  -scheme MxxHub \
   -configuration Release \
   -sdk iphoneos \
   -destination 'generic/platform=iOS' \
@@ -19,9 +16,9 @@ xcodebuild \
   CODE_SIGNING_REQUIRED=NO \
   CONFIGURATION_BUILD_DIR="$PWD/build" \
   build
-
+rm -rf Payload MxxHub-v0.3-unsigned.ipa
 mkdir Payload
-cp -R build/MexxBox.app Payload/
-/usr/bin/zip -qry MexxBox-unsigned.ipa Payload
-
-echo "Created: $PWD/MexxBox-unsigned.ipa"
+cp -R build/MxxHub.app Payload/
+zip -qry MxxHub-v0.3-unsigned.ipa Payload
+rm -rf Payload
+echo "Built: $PWD/MxxHub-v0.3-unsigned.ipa"
