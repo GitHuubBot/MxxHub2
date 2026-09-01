@@ -1,4 +1,4 @@
-name: Build MexxBox iOS
+name: Build MxxHub iOS v0.3.1
 
 on:
   workflow_dispatch:
@@ -10,24 +10,34 @@ jobs:
     runs-on: macos-15
 
     steps:
-      - name: Checkout
+      - name: Checkout MxxHub
         uses: actions/checkout@v5
 
       - name: Show Xcode version
         run: xcodebuild -version
 
-      - name: Install XcodeGen
-        run: brew install xcodegen
+      - name: Install build tools
+        run: brew install xcodegen make
+
+      - name: Prepare WineGlass + Blink runtime
+        run: bash Scripts/prepare_wineglass.sh
+
+      - name: Verify runtime files
+        run: |
+          test -d External/WineGlass/Sources
+          test -f External/WineGlass/Vendor/blink/lib/blink.a
+          test -f External/WineGlass/Vendor/blink/lib/wg_blink_impl.o
+          cat External/UPSTREAM_VERSIONS.txt
 
       - name: Generate Xcode project
-        run: xcodegen generate
+        run: xcodegen generate --spec project.yml
 
       - name: Build unsigned device app
         run: |
           set -o pipefail
           xcodebuild \
-            -project MexxBox.xcodeproj \
-            -scheme MexxBox \
+            -project MxxHub.xcodeproj \
+            -scheme MxxHub \
             -configuration Release \
             -sdk iphoneos \
             -destination 'generic/platform=iOS' \
@@ -42,7 +52,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: MexxBox-build-log
+          name: MxxHub-v0.3.1-build-log
           path: xcodebuild.log
           if-no-files-found: ignore
 
@@ -50,11 +60,11 @@ jobs:
         run: |
           rm -rf Payload
           mkdir Payload
-          cp -R build/MexxBox.app Payload/
-          zip -qry MexxBox-unsigned.ipa Payload
+          cp -R build/MxxHub.app Payload/
+          zip -qry MxxHub-v0.3.1-unsigned.ipa Payload
 
       - name: Upload IPA
         uses: actions/upload-artifact@v4
         with:
-          name: MexxBox-unsigned-ipa
-          path: MexxBox-unsigned.ipa
+          name: MxxHub-v0.3.1-unsigned-ipa
+          path: MxxHub-v0.3.1-unsigned.ipa
