@@ -1,0 +1,3 @@
+MEXXBOX TEST FILE
+This is deliberately not a real Windows executable.
+It exists only so the v0.1 .exe scanner can be tested safely.
