@@ -1,38 +1,26 @@
-# Runtime integration plan
+# Runtime roadmap
 
-The launcher calls one interface: `WindowsRuntimeProtocol`.
+## v0.2 — achieved in this source package
 
-## Stage A — tiny Win32 program
+Windows PE32 parser → entry-point mapping → tiny x86 interpreter → on-device correctness test.
 
-Replace `StubWindowsRuntime` with a real runtime implementation that can start a tiny x86/x64 PE executable. Keep graphics simple and prove filesystem access first.
+## v0.3
 
-## Stage B — JIT / translation
+Integrate an existing mature x86 execution core rather than expanding the tiny interpreter. Current candidates:
 
-Integrate an x86/x64-to-ARM64 translator. The runtime must expose a clear JIT status because performance without JIT is expected to be insufficient for Source-engine games.
+- WineGlass: Windows PE + Win32 API translation + Metal compositor.
+- Box64 iOS: embedded x86_64 translation foundation; pair with Wine/WoW64 later.
 
-## Stage C — Wine
+Target: run a simple real Windows GUI program that calls Win32 APIs.
 
-Bundle a Wine build compatible with the chosen translator and initialize one prefix per compatibility profile. Map the selected iOS game folder into a stable Wine drive path.
+## v0.4
 
-## Stage D — graphics
+Wine/WoW64 + graphics bridge, file mappings, audio and controller input.
 
-Start with Direct3D 9 because Portal and Half-Life 2 are early targets. Add the DirectX-to-Vulkan/Metal path only after basic Win32 execution is reliable.
+## Source Engine milestone
 
-## Stage E — Source preset
-
-Create a Source Engine profile:
-
-- 1280x720 default
-- controller enabled
-- conservative memory target
-- D3D9 path
-- predefined launch-argument options
-
-Then test in this order:
-
-1. Half-Life 2 benchmark/menu
-2. Portal menu
-3. Portal gameplay
-4. HL2 gameplay
-5. Portal 2 menu
-6. Portal 2 gameplay
+1. Half-Life 2 / Source DX9 launcher starts.
+2. Portal reaches menu.
+3. Portal enters a map.
+4. Controller + touch mapping.
+5. Portal 2 after the Portal path is stable.

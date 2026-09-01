@@ -1,41 +1,21 @@
-# MexxBox 0.1 Test Checklist
+# MexxBox v0.2 test
 
-## Simulator test
+1. Build the unsigned IPA in GitHub Actions and sideload it as before.
+2. Put `MexxRuntimeTestFolder.zip` in Files on the iPhone and extract it.
+3. In MexxBox tap **+** and select the extracted `MexxRuntimeTestFolder`.
+4. The app should identify `MexxRuntimeTest.exe` as `x86 (32-bit) • Windows Console`.
+5. Add it to the library.
+6. Open it and press **Play / Runtime Test**.
+7. Success is:
 
-- App launches
-- Library empty state appears
-- Settings shows `Wine + Box64 / not bundled`
-- Add Game opens the document picker
-- A selected test folder is scanned for `.exe` files
-- Adding a selected executable creates a game tile
-- Relaunching the app keeps the library entry
-- Editing settings and saving survives relaunch
-- Removing the game removes only the library entry
+   `x86 executable ran`
 
-## Physical iPhone test
+   and a message showing:
 
-Physical hardware is the important target because the future emulator/JIT/Metal runtime cannot be validated in the iOS Simulator.
+   `EAX returned 42`
 
-### Test data
+That proves a real Windows PE file was parsed and its x86 entry-point instructions executed by MexxBox on iOS.
 
-Copy `SampleGames/PortalTest` into `On My iPhone` using Files, iCloud Drive, AirDrop, USB file sharing, or another file provider.
+## Trying a real game EXE
 
-Expected scan order:
-
-1. `portal.exe`
-2. `bin/setup.exe` (de-prioritized)
-
-### Expected Play behavior in 0.1
-
-Pressing Play must show a message saying the launcher selected the executable but Wine/Box64 is not bundled yet. That is a PASS for milestone 0.1.
-
-## Milestone 0.2 acceptance test
-
-The first real runtime acceptance target should be a tiny Win32 test executable rather than Portal:
-
-- Start a simple x86 Windows `.exe`
-- Show a native Windows message/window through Wine
-- Read files from the selected game folder
-- Exit cleanly without crashing iOS
-
-Only after that should Portal/Source Engine work begin.
+You can add Portal/HL2 folders now. MexxBox should identify the executable architecture. Pressing Play will probably stop at the first x86 instruction not supported by the tiny bring-up interpreter. That is expected. Do not treat that as a Portal compatibility failure; the next step is replacing the tiny interpreter with the WineGlass/Box64 backend and Win32/graphics support.

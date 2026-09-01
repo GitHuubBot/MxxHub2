@@ -6,7 +6,9 @@ struct GameDetailView: View {
 
     @State var game: GameEntry
     @State private var launchError: String?
+    @State private var launchSuccess: RuntimeLaunchResult?
     @State private var launching = false
+    @State private var peInfo: PEInfo?
 
     var body: some View {
         Form {
@@ -26,7 +28,7 @@ struct GameDetailView: View {
                         HStack {
                             if launching { ProgressView() }
                             Image(systemName: "play.fill")
-                            Text(launching ? "Starting…" : "Play")
+                            Text(launching ? "Starting…" : "Play / Runtime Test")
                         }
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 8)
@@ -35,6 +37,15 @@ struct GameDetailView: View {
                     .disabled(launching)
                 }
                 .frame(maxWidth: .infinity)
+            }
+
+            Section("Windows executable") {
+                LabeledContent("Architecture", value: peInfo?.architecture.rawValue ?? "Checking…")
+                LabeledContent("Subsystem", value: peInfo?.subsystem.rawValue ?? "—")
+                if let peInfo {
+                    LabeledContent("Entry point", value: String(format: "RVA 0x%08X", peInfo.entryPointRVA))
+                    LabeledContent("Sections", value: "\(peInfo.sections.count)")
+                }
             }
 
             Section("Game") {
@@ -71,11 +82,12 @@ struct GameDetailView: View {
                     dismiss()
                 }
             } footer: {
-                Text("Removing a game from MexxBox does not delete the game folder from Files.")
+                Text("v0.2 can execute the included tiny x86 Windows PE test. Real games will intentionally stop on unsupported instructions until the full Win32/WineGlass backend is integrated.")
             }
         }
         .navigationTitle(game.name)
         .navigationBarTitleDisplayMode(.inline)
+        .task { inspectExecutable() }
         .alert("Windows runtime", isPresented: Binding(
             get: { launchError != nil },
             set: { if !$0 { launchError = nil } }
@@ -83,6 +95,26 @@ struct GameDetailView: View {
             Button("OK", role: .cancel) {}
         } message: {
             Text(launchError ?? "")
+        }
+        .alert(launchSuccess?.title ?? "Runtime test", isPresented: Binding(
+            get: { launchSuccess != nil },
+            set: { if !$0 { launchSuccess = nil } }
+        )) {
+            Button("Great", role: .cancel) {}
+        } message: {
+            Text(launchSuccess?.message ?? "")
+        }
+    }
+
+    private func inspectExecutable() {
+        do {
+            let folder = try store.resolvedFolder(for: game)
+            guard folder.startAccessingSecurityScopedResource() else { return }
+            defer { folder.stopAccessingSecurityScopedResource() }
+            let executable = folder.appendingPathComponent(game.executableRelativePath)
+            peInfo = try PEInspector.inspect(url: executable)
+        } catch {
+            peInfo = nil
         }
     }
 
@@ -92,7 +124,7 @@ struct GameDetailView: View {
         do {
             let folder = try store.resolvedFolder(for: game)
             let executable = folder.appendingPathComponent(game.executableRelativePath)
-            try StubWindowsRuntime.shared.launch(game: game, folder: folder, executable: executable)
+            launchSuccess = try BringUpWindowsRuntime.shared.launch(game: game, folder: folder, executable: executable)
         } catch {
             launchError = error.localizedDescription
         }

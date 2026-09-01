@@ -25,7 +25,7 @@ struct AddGameView: View {
 
                 if scanning {
                     Section {
-                        HStack { ProgressView(); Text("Scanning for .exe files…") }
+                        HStack { ProgressView(); Text("Scanning Windows executables…") }
                     }
                 }
 
@@ -45,11 +45,14 @@ struct AddGameView: View {
                                 selectedCandidate = candidate
                             } label: {
                                 HStack {
-                                    VStack(alignment: .leading) {
+                                    VStack(alignment: .leading, spacing: 3) {
                                         Text(candidate.displayName)
                                         Text(candidate.relativePath)
                                             .font(.caption2.monospaced())
                                             .foregroundStyle(.secondary)
+                                        Text(candidate.peInfo?.summary ?? "Unknown / malformed PE")
+                                            .font(.caption2)
+                                            .foregroundStyle(candidate.peInfo == nil ? Color.orange : Color.green)
                                     }
                                     Spacer()
                                     if selectedCandidate?.id == candidate.id {

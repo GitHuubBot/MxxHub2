@@ -5,6 +5,7 @@ struct ExecutableCandidate: Identifiable, Hashable {
     let url: URL
     let relativePath: String
     let score: Int
+    let peInfo: PEInfo?
 
     var displayName: String { url.lastPathComponent }
 }
@@ -29,7 +30,8 @@ enum FolderScanner {
         for case let url as URL in enumerator {
             guard url.pathExtension.lowercased() == "exe" else { continue }
             let relative = relativePath(of: url, inside: folder)
-            found.append(.init(url: url, relativePath: relative, score: rank(url: url)))
+            let info = try? PEInspector.inspect(url: url)
+            found.append(.init(url: url, relativePath: relative, score: rank(url: url), peInfo: info))
         }
 
         return found.sorted {
@@ -52,7 +54,7 @@ enum FolderScanner {
         if badNames.contains(where: { name.contains($0) }) { return -50 }
 
         var score = 0
-        if ["portal", "hl2", "portal2", "game", "launcher"].contains(name) { score += 50 }
+        if ["portal", "hl2", "portal2", "game", "launcher", "mexxruntimetest"].contains(name) { score += 50 }
         if url.pathComponents.count < 8 { score += 5 }
         return score
     }
